@@ -1,0 +1,29 @@
+{
+  "name": "tsfis",
+  "version": "0.0.0",
+  "description": "Fuzzy Inference System API",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=node --target=node10",
+    "build:watch": "pnpm build -- --watch",
+    "build:post": "tsc src/index.ts --declaration --emitDeclarationOnly --outDir dist",
+    "build:full": "pnpm build && pnpm build:post"
+  },
+  "keywords": [
+    "fuzzy",
+    "inference",
+    "sugeno",
+    "tsukamoto",
+    "mamdani"
+  ],
+  "author": "ahmaddynugroho",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^27.4.1",
+    "esbuild": "^0.14.36",
+    "jest": "^27.5.1",
+    "ts-jest": "^27.1.4",
+    "typescript": "^4.6.3"
+  }
+}
