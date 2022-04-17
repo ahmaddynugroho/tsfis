@@ -88,14 +88,11 @@ export function inferenceSystem(
     return data.variable[modifiedVarIndex];
   };
 
-  if (debug)
-    return {
-      addVariable,
-      addSet,
-      data,
-    };
-  return {
+  const methods = {
     addVariable,
     addSet,
   };
+
+  if (debug) return { ...methods, data };
+  return methods;
 }
