@@ -51,13 +51,16 @@ export function triangleFactory(
   return (x: number): number => {
     if (x < a || x > c) return 0;
     if (x < b) return (x - a) / (b - a);
-    if (x <= c) return (c - x) / (c - b);
+    return (c - x) / (c - b);
   };
 }
 
 // debug is used in jest
 // TODO: add return type
-export function inferenceSystem(method: InferenceMethod) {
+export function inferenceSystem(
+  method: InferenceMethod,
+  debug: Boolean = false
+) {
   const data: InferenceSystemData = {
     method,
     variable: [],
@@ -85,6 +88,12 @@ export function inferenceSystem(method: InferenceMethod) {
     return data.variable[modifiedVarIndex];
   };
 
+  if (debug)
+    return {
+      addVariable,
+      addSet,
+      data,
+    };
   return {
     addVariable,
     addSet,

@@ -68,6 +68,17 @@ describe("inferenceSystem factory", () => {
     ]);
   });
 
+  test("add empty variable", () => {
+    const FS = inferenceSystem("sugeno", true);
+    FS.addVariable("luas", []);
+
+    expect(FS.data.variable[0]).toEqual({
+      name: "luas",
+      value: 0,
+      set: [],
+    });
+  });
+
   test("add set", () => {
     const FS = inferenceSystem("sugeno");
     FS.addVariable("luas", [
