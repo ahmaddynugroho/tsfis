@@ -1,4 +1,4 @@
-import { inferenceSystemSugeno } from "../index";
+import { inferenceSystem } from "../index";
 
 const fuzzyVarB = {
   ipk: {
@@ -36,5 +36,5 @@ const inputValBB = {
   ipk: 2.99,
   gaji: 1,
 };
-inferenceSystemSugeno(fuzzyVarB, ruleB, inputValB);
-inferenceSystemSugeno(fuzzyVarB, ruleB, inputValBB);
+inferenceSystem(fuzzyVarB, ruleB, inputValB);
+inferenceSystem(fuzzyVarB, ruleB, inputValBB);

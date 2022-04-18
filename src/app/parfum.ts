@@ -1,4 +1,4 @@
-import { inferenceSystemSugeno } from "../index";
+import { inferenceSystem } from "../index";
 
 const fuzzyVar = {
   luas: {
@@ -34,4 +34,4 @@ const inputVal = {
   keharuman: 10,
 };
 
-inferenceSystemSugeno(fuzzyVar, rule, inputVal);
+inferenceSystem(fuzzyVar, rule, inputVal);

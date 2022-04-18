@@ -41,7 +41,7 @@ function inferSugeno(operator, fuzzyMFMap, ruleLeft, ruleRight, inputVal) {
   return [crispSet, crisp];
 }
 
-export const inferenceSystemSugeno = (fuzzyVar, rule, inputVal) => {
+export const inferenceSystem = (fuzzyVar, rule, inputVal) => {
   let operator = Math.min;
 
   const fuzzyMFMap = {};
