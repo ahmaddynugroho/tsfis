@@ -1,53 +1,4 @@
-// feat:
-// 1. fuzzy inference system
-// 2. modify fuzzy sets and variable
-// 3. stick with triangle function
-// 4. modular: easily add new membership function
-// 5. tsukamoto
-//
-// todo:
-// 1. function membership (done)
-// 2. fuzzy sets
-// 3. variable
-// 4. tsukamoto inference
-//
-// component:
-// 1. input variables
-// 2. rules
-// 3. output variable
-//
-// flow:
-// 1. input variables
-// 2. rules
-// 3. input
-// 4. infer
-
-type MembershipFunction = (x: number) => number;
-type InferenceMethod = "sugeno" | "mamdani" | "tsukamoto";
-type TriangularBorder = [number, number, number];
-type TrapezoidalBorder = [number, number, number, number];
-
-export interface Domain {
-  name: string;
-  border: TriangularBorder | TrapezoidalBorder;
-  shape: "triangular" | "trapezoidal";
-}
-export interface Variable {
-  name: string;
-  value: number;
-  set: Domain[];
-}
-export interface InferenceSystemData {
-  method: InferenceMethod;
-  variable: Variable[];
-  rule: any[];
-}
-
-export function triangleFactory(
-  a: number,
-  b: number,
-  c: number
-): MembershipFunction {
+function triangleFactory(a: number, b: number, c: number) {
   return (x: number): number => {
     if (x < a || x > c) return 0;
     if (x < b) return (x - a) / (b - a);
@@ -55,44 +6,81 @@ export function triangleFactory(
   };
 }
 
-// debug is used in jest
-// TODO: add return type
-export function inferenceSystem(
-  method: InferenceMethod,
-  debug: Boolean = false
-) {
-  const data: InferenceSystemData = {
-    method,
-    variable: [],
-    rule: [],
-  };
-  const addVariable = (name: string, set: Domain[]): Variable[] => {
-    data.variable.push({
-      name,
-      value: 0,
-      set,
-    });
-    return data.variable;
-  };
-  const addSet = (variableName: string, domain: Domain): Variable => {
-    let modifiedVarIndex = 0;
-    let found = false;
-    data.variable.forEach((v, i) => {
-      if (v.name === variableName) {
-        v.set.push(domain);
-        modifiedVarIndex = i;
-        found = true;
-      }
-    });
-    if (!found) console.error("variable:", variableName, "not found");
-    return data.variable[modifiedVarIndex];
-  };
+function inferSugeno(operator, fuzzyMFMap, ruleLeft, ruleRight, inputVal) {
+  const membershipVal = ruleLeft
+    .map((el) =>
+      el.map((el) => {
+        const varNameSet = el.split("=");
+        const [a, b, c] = fuzzyMFMap[varNameSet.join("")];
+        return triangleFactory(a, b, c)(inputVal[varNameSet[0]]);
+      })
+    )
+    .map((el) => operator(...el));
 
-  const methods = {
-    addVariable,
-    addSet,
-  };
+  const namedZ = ruleRight.map((el) => {
+    const varNameSet = el.split("=");
+    return [varNameSet[1], fuzzyMFMap[varNameSet.join("")][0]];
+  });
+  const z = ruleRight.map((el) => {
+    const varNameSet = el.split("=");
+    return fuzzyMFMap[varNameSet.join("")][0];
+  });
 
-  if (debug) return { ...methods, data };
-  return methods;
+  const numerator = z.reduce((p, c, i) => p + c * membershipVal[i], 0);
+  const denominator = membershipVal.reduce((p, c) => p + c, 0);
+  const crisp = numerator / denominator;
+  let crispSet = namedZ[0][0];
+  let crispSetN = namedZ[0][1];
+  namedZ.forEach((el) => {
+    const distance = Math.abs(crisp - el[1]);
+    if (distance < crispSetN) {
+      crispSet = el[0];
+      crispSetN = distance;
+    }
+  });
+  return [crispSet, crisp];
 }
+
+export const inferenceSystemSugeno = (fuzzyVar, rule, inputVal) => {
+  let operator = Math.min;
+
+  const fuzzyMFMap = {};
+  function makeMap(emptyMap, fuzzyVar) {
+    for (const p in fuzzyVar) {
+      for (const pr in fuzzyVar[p]) {
+        const key = p + pr;
+        emptyMap[key] = fuzzyVar[p][pr];
+      }
+    }
+  }
+  makeMap(fuzzyMFMap, fuzzyVar);
+
+  // [
+  //   [ 'luas=kecil', 'keharuman=bau' ],
+  //   [ 'luas=kecil', 'keharuman=normal' ],
+  //   [ 'luas=kecil', 'keharuman=wangi' ]
+  // ]
+  const ruleLeft = rule
+    .map((rule) => rule.split(" ").join("").split("THEN"))
+    .map((el) => el[0])
+    .map((el: string) => {
+      if (el.includes("AND")) {
+        return el.split("AND");
+      }
+      operator = Math.max;
+      return el.split("OR");
+    });
+
+  const ruleRight = rule
+    .map((rule) => rule.split(" ").join("").split("THEN"))
+    .map((el) => el[1]);
+
+  const [crispSet, crisp] = inferSugeno(
+    operator,
+    fuzzyMFMap,
+    ruleLeft,
+    ruleRight,
+    inputVal
+  );
+  console.log(crispSet, crisp);
+};

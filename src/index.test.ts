@@ -49,7 +49,6 @@ describe("inferenceSystem factory", () => {
     ]);
 
     expect(vars[0].name).toBe("luas");
-    expect(vars[0].value).toBe(0);
     expect(vars[0].set).toEqual([
       {
         name: "kecil",
@@ -58,7 +57,6 @@ describe("inferenceSystem factory", () => {
       },
     ]);
     expect(vars[1].name).toBe("keharuman");
-    expect(vars[1].value).toBe(0);
     expect(vars[1].set).toEqual([
       {
         name: "bau",
@@ -69,12 +67,11 @@ describe("inferenceSystem factory", () => {
   });
 
   test("add empty variable", () => {
-    const FS = inferenceSystem("sugeno", true);
+    const FS = inferenceSystem("sugeno");
     FS.addVariable("luas", []);
 
-    expect(FS.data.variable[0]).toEqual({
+    expect(FS.getData().variable[0]).toEqual({
       name: "luas",
-      value: 0,
       set: [],
     });
   });
@@ -125,5 +122,82 @@ describe("inferenceSystem factory", () => {
       border: [15, 25, 36],
       shape: "triangular",
     });
+  });
+  test("add fuzzy rule and", () => {
+    const FS = inferenceSystem("sugeno");
+    FS.addRule("and", [
+      [
+        ["luas", "kecil"],
+        ["keharuman", "bau"],
+        ["volume", "banyak"],
+      ],
+    ]);
+    expect(FS.getData().ruleSet).toEqual({
+      operator: "and",
+      set: [
+        [
+          ["luas", "kecil"],
+          ["keharuman", "bau"],
+          ["volume", "banyak"],
+        ],
+      ],
+    });
+  });
+  test("add fuzzy rule or", () => {
+    const FS = inferenceSystem("sugeno");
+    FS.addRule("or", [
+      [
+        ["luas", "kecil"],
+        ["keharuman", "bau"],
+        ["volume", "banyak"],
+      ],
+    ]);
+    expect(FS.getData().ruleSet).toEqual({
+      operator: "or",
+      set: [
+        [
+          ["luas", "kecil"],
+          ["keharuman", "bau"],
+          ["volume", "banyak"],
+        ],
+      ],
+    });
+  });
+  test("add three rule", () => {
+    const FS = inferenceSystem("sugeno");
+    FS.addRule("and", [
+      [
+        ["luas", "kecil"],
+        ["keharuman", "bau"],
+        ["volume", "sedikit"],
+      ],
+      [
+        ["luas", "sedang"],
+        ["keharuman", "normal"],
+        ["volume", "sedikit"],
+      ],
+      [
+        ["luas", "luas"],
+        ["keharuman", "wangi"],
+        ["volume", "banyak"],
+      ],
+    ]);
+    expect(FS.getData().ruleSet.set).toEqual([
+      [
+        ["luas", "kecil"],
+        ["keharuman", "bau"],
+        ["volume", "sedikit"],
+      ],
+      [
+        ["luas", "sedang"],
+        ["keharuman", "normal"],
+        ["volume", "sedikit"],
+      ],
+      [
+        ["luas", "luas"],
+        ["keharuman", "wangi"],
+        ["volume", "banyak"],
+      ],
+    ]);
   });
 });
